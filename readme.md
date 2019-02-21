@@ -4,7 +4,7 @@ Node web app for OpenEVSE WiFi gateway, can be run on embeded Linux e.g Raspberr
 
 ## Requirements
 
-``` shell
+```shell
 sudo apt-get intall node nodejs npm
 ```
 
@@ -26,14 +26,14 @@ Run with, where `<endpoint>` is the serial port where the open_evse controller:
 openevse_wifi --endpoint <endpoint>
 ```
 
-#### To Install on Raspbian Stretch 
+### To Install on Raspbian Stretch
 
 NPM must be updated since updated NPM package is no longer mentained for Stretch
 
-```
+```shell
 curl -sL https://deb.nodesource.com/setup_10.x | sudo bash -
 sudo apt-get install -y nodejs
-sudo chown -R pi ~/.config/ 
+sudo chown -R pi ~/.config/
 sudo chown -R pi ~/.npm
 sudo chown -R pi /usr/lib/node_modules/
 npm install -g openevse_wifi
@@ -87,9 +87,9 @@ npm install
 
 ## Debugging
 
-OpenEVSE WiFi uses the [debug]() library as does a number of the dependant modules. To enable debug you set the `DEBUG` variable to a filter indicating the modules you wish to receive debug from, eg;
+OpenEVSE WiFi uses the [debug](https://github.com/visionmedia/debug) library as do a number of the dependant modules. To enable debug you set the `DEBUG` variable to a filter indicating the modules you wish to receive debug from, eg;
 
-```shell
+```bash
 export DEBUG=openevse*
 npm start
 ```
@@ -126,34 +126,32 @@ Edit service file to specify correct path to match installation location
 
 Run at startup:
 
-```
+```shell
 sudo systemctl daemon-reload
 sudo systemctl enable openevse.service
 ```
 
 ### Using PM2
 
-```
+```shell
 sudo npm install -g pm2
 pm2 start app.js
 ```
 
 For status:
 
-```
+```shell
 pm2 info app
 pm2 list
 pm2 restart app
 mp2 stop app
 ```
 
-
 ## Serve via apache
-
 
 Install apache `mod-proxy` module then enable it:
 
-```
+```shell
 sudo apt-get install libapache2-mod-proxy-html
 sudo a2enmod proxy
 sudo a2enmod proxy_http
@@ -162,14 +160,14 @@ sudo a2enmod rewrite
 
 copy `example-openevse-apache.conf` to `/etc/apache2/sites-available` making the relevant changes for your server then enable the site using `a2ensite`. e.g.
 
-```
+```shell
 sudo cp example-openevse-apache.conf /etc/apache2/sites-available/openevse.conf
 sudo a2ensite openevse
 ```
 
 Create log files, this step may not be needed but it's a good idea to check the permissions.
 
-```
+```shell
 sudo touch /var/log/apache2/openevse_error.log
 sudo touch /var/log/apache2/openevse_access.log
 sudo service restart apache2
