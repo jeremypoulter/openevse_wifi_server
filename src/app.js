@@ -4,6 +4,7 @@
 const minimist = require("minimist");
 const OpenEVSEWiFi = require("./openevsewifi");
 const web = require("./web");
+const debug = require("debug")("openevse:wifi:app");
 
 var app = new OpenEVSEWiFi();
 
@@ -29,6 +30,8 @@ if(args.version) {
   console.log(app.info.version);
   return 0;
 }
+
+debug(args);
 
 app.start(args.endpoint);
 web.start(app, args.port);

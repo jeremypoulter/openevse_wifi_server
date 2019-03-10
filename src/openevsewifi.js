@@ -12,6 +12,8 @@ const mqtt = require("mqtt");
 const EventEmitter = require("events");
 const debug = require("debug")("openevse:wifi");
 
+const ocpp = require("ocpp-eliftech");
+
 module.exports = class OpenEVSEWiFi extends EventEmitter
 {
   constructor()
@@ -22,7 +24,10 @@ module.exports = class OpenEVSEWiFi extends EventEmitter
       firmware: "-",
       protocol: "-",
       espflash: 0,
-      version: "0.0.1"
+      version: "0.0.1",
+      vendor: "OpenEVSE",
+      model: "GoPlug Home",
+      serial_number: "SN123456"
     };
     this.openevse = {
       diodet: 0,
@@ -64,16 +69,21 @@ module.exports = class OpenEVSEWiFi extends EventEmitter
         enabled: false,
         key: ""
       },
+      ocpp: {
+        enabled: true,
+        central_system: "ws://moonshade.lan:8080/steve/websocket/CentralSystemService",
+        charge_box_id: "OpenEVSE_1"
+      }
     };
     this._status = {
       mode: "STA",
-      wifi_client_connected: 1,
+      wifi_client_connected: 0,
       srssi: -50,
       ipaddress: "172.16.0.191",
       emoncms_connected: 0,
       packets_sent: 0,
       packets_success: 0,
-      mqtt_connected: 1,
+      mqtt_connected: 0,
       ohm_hour: "NotConnected",
       ohm_started_charge: false,
       free_heap: 20816,
@@ -95,7 +105,8 @@ module.exports = class OpenEVSEWiFi extends EventEmitter
       solar: 0,
       grid_ie: 0,
       charge_rate: 0,
-      divert_update: 0
+      divert_update: 0,
+      ocpp_connected: 0
     };
 
     // Time between sending a command to the OpenEVSE
@@ -298,6 +309,8 @@ module.exports = class OpenEVSEWiFi extends EventEmitter
     });
 
     this.mqttBroker = this.connectToMqttBroker();
+    this.centralSystem = this.connectToCentralSystem();
+
     this.on("status", (status) => {
       this.uploadMqtt(status);
       if(status.state) {
@@ -308,7 +321,6 @@ module.exports = class OpenEVSEWiFi extends EventEmitter
     this.runList(this.initList, function () {
       this.update();
     }.bind(this));
-
 
     setInterval(this.checkOhmHour.bind(this), this.ohmTime);
   }
@@ -361,6 +373,67 @@ module.exports = class OpenEVSEWiFi extends EventEmitter
           this.divert.solar = parseFloat(message);
         }
       });
+      return client;
+    }
+
+    return false;
+  }
+
+  connectToCentralSystem()
+  {
+    this.status = {
+      ocpp_connected: 0
+    };
+
+    if(this.config.ocpp.enabled)
+    {
+      var connectors = [
+        new ocpp.Connector(1)
+      ]
+      const client = new ocpp.ChargePoint({
+        centralSystemUrl: this.config.ocpp.central_system+"/"+this.config.ocpp.charge_box_id,
+        connectors: connectors
+      });
+
+      client.connect().then(() => {
+        client.onRequest = (command) =>
+        {
+          debug(command);
+          //switch (true) {
+          //case command instanceof ocpp.OCPPCommands.RemoteStartTransaction:
+          //  setTimeout(() => startTransaction(command), 1);
+          //  return {
+          //    status: RemoteStartTransactionConst.STATUS_ACCEPTED
+          //  };
+          //case command instanceof ocpp.OCPPCommands.RemoteStopTransaction:
+          //  setTimeout(() => stopTransaction(command), 1);
+          //  return {
+          //    status: RemoteStartTransactionConst.STATUS_ACCEPTED
+          //  };
+          //}
+        };
+
+        const boot = new ocpp.OCPPCommands.BootNotification({
+          chargePointVendor: this.info.vendor,
+          chargeBoxSerialNumber: this.info.serial_number,
+          chargePointModel: this.info.model,
+          firmwareVersion: this.info.version + "_" + this.info.firmware
+        });
+
+        client.send(boot).then(() => {
+          client.sendCurrentStatus().then(() => {
+            this.status = {
+              ocpp_connected: 1
+            };
+          });
+        });
+      }).catch((e) => {
+        debug(e);
+        this.status = {
+          ocpp_connected: -1
+        };
+      });
+
       return client;
     }
 
