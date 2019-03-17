@@ -26,8 +26,7 @@ module.exports = class OpenEVSEWiFi extends EventEmitter
       espflash: 0,
       version: "0.0.1",
       vendor: "OpenEVSE",
-      model: "GoPlug Home",
-      serial_number: "SN123456"
+      model: "GoPlug Home"
     };
     this.openevse = {
       diodet: 0,
@@ -70,9 +69,13 @@ module.exports = class OpenEVSEWiFi extends EventEmitter
         key: ""
       },
       ocpp: {
-        enabled: true,
-        central_system: "ws://moonshade.lan:8080/steve/websocket/CentralSystemService",
-        charge_box_id: "OpenEVSE_1"
+        enabled: false,
+        central_system: "",
+        charge_box_id: false,
+        tag_id: false
+      },
+      system: {
+        serial_number: false
       }
     };
     this._status = {
@@ -283,6 +286,25 @@ module.exports = class OpenEVSEWiFi extends EventEmitter
   start(endpoint)
   {
     this._config = config.load(this._config);
+    if(false === this._config.ocpp.tag_id ||
+       false === this._config.ocpp.charge_box_id ||
+       false === this._config.system.serial_number)
+    {
+      // Generate some random values and save
+      if(false === this._config.ocpp.tag_id) {
+        this._config.ocpp.tag_id = Math.random().toString(16).substring(7).toUpperCase();
+      }
+
+      if(false === this._config.ocpp.charge_box_id) {
+        this._config.ocpp.charge_box_id = "OpenEVSE_"+(Math.random().toString(36).substring(7).toUpperCase());
+      }
+
+      if(false === this._config.system.serial_number) {
+        this._config.system.serial_number = "SN"+(Math.random().toString(10).substring(8));
+      }
+
+      config.save(this._config);
+    }
 
     this.evseConn = openevse.connect(endpoint);
     this.evseConn.on("state", (state) => {
@@ -389,7 +411,7 @@ module.exports = class OpenEVSEWiFi extends EventEmitter
     {
       var connectors = [
         new ocpp.Connector(1)
-      ]
+      ];
       const client = new ocpp.ChargePoint({
         centralSystemUrl: this.config.ocpp.central_system+"/"+this.config.ocpp.charge_box_id,
         connectors: connectors
@@ -415,7 +437,7 @@ module.exports = class OpenEVSEWiFi extends EventEmitter
 
         const boot = new ocpp.OCPPCommands.BootNotification({
           chargePointVendor: this.info.vendor,
-          chargeBoxSerialNumber: this.info.serial_number,
+          chargeBoxSerialNumber: this.config.system.serial_number,
           chargePointModel: this.info.model,
           firmwareVersion: this.info.version + "_" + this.info.firmware
         });
