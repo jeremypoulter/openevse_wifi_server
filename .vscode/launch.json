@@ -15,7 +15,10 @@
       "type": "node",
       "request": "launch",
       "name": "Launch Server",
-      "program": "${workspaceFolder}/src/app.js"
+      "program": "${workspaceFolder}/src/app.js",
+      "env": {
+        "DEBUG": "openevse*"
+      }
     }
   ]
 }
