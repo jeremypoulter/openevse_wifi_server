@@ -9,10 +9,11 @@ const debug = require("debug")("openevse:ocpp");
 
 module.exports = class  extends base
 {
-  constructor(evse)
+  constructor(evse, system)
   {
     super();
     this.evse = evse;
+    this.system = system;
     this.ocpp = {
       enabled: false,
       central_system: "",
@@ -58,10 +59,10 @@ module.exports = class  extends base
         };
 
         const boot = new ocpp.OCPPCommands.BootNotification({
-          chargePointVendor: this.info.vendor,
-          chargeBoxSerialNumber: this.config.system.serial_number,
-          chargePointModel: this.info.model,
-          firmwareVersion: this.info.version + "_" + this.info.firmware
+          chargePointVendor: this.evse.info.vendor,
+          chargeBoxSerialNumber: this.system.serial_number,
+          chargePointModel: this.evse.info.model,
+          firmwareVersion: this.evse.info.version + "_" + this.evse.info.firmware
         });
 
         client.send(boot).then(() => {
