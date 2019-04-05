@@ -14,7 +14,7 @@ module.exports = class  extends base
     super();
     this.evse = evse;
     this.system = system;
-    this.ocpp = {
+    this.config = {
       enabled: false,
       central_system: "",
       charge_box_id: false,
