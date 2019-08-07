@@ -20,7 +20,7 @@ module.exports = class extends base
 
     this._status = {
       ohm_hour: "NotConnected",
-      ohm_started_charge: false
+      ohm_charge_sleep: false
     };
 
   }
@@ -32,7 +32,7 @@ module.exports = class extends base
     this.key = config.key;
 
     if(this.enabled && false === this.inteterval) {
-      this.inteterval = setInterval(this.checkOhmHour.bind(this), this.ohmTime);
+      this.inteterval = setInterval(this.checkOhmHour, this.ohmTime);
     } else if(!this.enabled && false !== this.inteterval) {
       clearInterval(this.inteterval);
       this.inteterval = false;
@@ -42,30 +42,30 @@ module.exports = class extends base
   checkOhmHour()
   {
     var ohm = new OhmHour(this.key);
-    ohm.check().then(function (state)
+    ohm.check().then((state) =>
     {
       if(state !== this._status.ohm_hour)
       {
         if("True" === state)
         {
-          this.evseConn.status(function () {
+          this.evseConn.status(() => {
             this.status = {
               ohm_hour: state,
-              ohm_started_charge: true
+              ohm_charge_sleep: true
             };
-          }.bind(this), "enable");
+          }, "sleep");
         }
-        else if(this._status.ohm_started_charge)
+        else if(this._status.ohm_charge_sleep)
         {
-          this.evseConn.status(function () {
+          this.evseConn.status(() => {
             this.status = {
               ohm_hour: state,
-              ohm_started_charge: false
+              ohm_charge_sleep: false
             };
-          }.bind(this), "sleep");
+          }, "enable");
         }
       }
-    }.bind(this)).catch(function (error) {
+    }).catch((error) => {
       console.error("OhmHour check Failed!", error);
     });
   }

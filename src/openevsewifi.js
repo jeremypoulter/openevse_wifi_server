@@ -103,7 +103,7 @@ module.exports = class OpenEVSEWiFi extends base
       packets_success: this.emoncms.packets_success,
       mqtt_connected: this.mqtt.status.mqtt_connected,
       ohm_hour: this.ohmconnect.status.ohm_hour,
-      ohm_started_charge: this.ohmconnect.status.ohm_started_charge,
+      ohm_charge_sleep: this.ohmconnect.status.ohm_charge_sleep,
       free_heap: this.evse.status.free_heap,
       comm_sent: this.evse.status.comm_sent,
       comm_success: this.evse.status.comm_success,
