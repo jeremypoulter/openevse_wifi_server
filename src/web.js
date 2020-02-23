@@ -187,11 +187,72 @@ app.post("/restart", function (req, res) {
   res.status(500).send("Not implemented");
 });
 
+function getRandomRssi() {
+  return -Math.floor(Math.random() * Math.floor(20));
+}
+
 app.get("/scan", function (req, res) {
   res.header("Cache-Control", "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0");
   setTimeout(function () {
-    res.json([{"rssi":-51,"ssid":"wibble_ext","bssid":"C4:04:15:5A:45:DE","channel":11,"secure":4,"hidden":false},{"rssi":-45,"ssid":"esplug_10560510","bssid":"1A:FE:34:A1:23:FE","channel":11,"secure":7,"hidden":false},{"rssi":-85,"ssid":"BTWifi-with-FON","bssid":"02:FE:F4:32:F1:08","channel":6,"secure":7,"hidden":false},{"rssi":-87,"ssid":"BTWifi-X","bssid":"22:FE:F4:32:F1:08","channel":6,"secure":7,"hidden":false},{"rssi":-75,"ssid":"wibble","bssid":"6C:B0:CE:20:7C:3A","channel":6,"secure":4,"hidden":false},{"rssi":-89,"ssid":"BTHub3-ZWCW","bssid":"00:FE:F4:32:F1:08","channel":6,"secure":8,"hidden":false}]);
-  }, 5000);
+    res.json([
+      {
+        "rssi": -50 + getRandomRssi(),
+        "ssid": "wibble_ext",
+        "bssid": "C4:04:15:5A:45:DE",
+        "channel": 11,
+        "secure": 4,
+        "hidden": false
+      },
+      {
+        "rssi": -50 + getRandomRssi(),
+        "ssid": "esplug_10560510",
+        "bssid": "1A:FE:34:A1:23:FE",
+        "channel": 11,
+        "secure": 7,
+        "hidden": false
+      },
+      {
+        "rssi": -100 + getRandomRssi(),
+        "ssid": "BTWifi-with-FON",
+        "bssid": "02:FE:F4:32:F1:08",
+        "channel": 6,
+        "secure": 7,
+        "hidden": false
+      },
+      {
+        "rssi": -60 + getRandomRssi(),
+        "ssid": "BTWifi-X",
+        "bssid": "22:FE:F4:32:F1:08",
+        "channel": 6,
+        "secure": 7,
+        "hidden": false
+      },
+      {
+        "rssi": -60 + getRandomRssi(),
+        "ssid": "wibble",
+        "bssid": "6C:B0:CE:20:7C:3A",
+        "channel": 6,
+        "secure": 4,
+        "hidden": false
+      },
+      {
+        "rssi": -30 + getRandomRssi(),
+        "ssid": "wibble",
+        "bssid": "6C:B0:CE:20:7C:4D",
+        "channel": 6,
+        "secure": 4,
+        "hidden": false
+      },
+      {
+        "rssi": -90 + getRandomRssi(),
+        "ssid": "BTHub3-ZWCW",
+        "bssid": "00:FE:F4:32:F1:08",
+        "channel": 6,
+        "secure": 8,
+        "hidden": false
+      }
+    ]);
+  }, 300);
 });
 
 app.post("/apoff", function (req, res) {
